@@ -210,7 +210,7 @@ public class DefaultClient implements Client.WithManagement {
     private MessageSendingQueue messageSendingScheduled;
     private final Object messageSendingLock = new Object();
 
-    private String name;
+    private String name = "blah blah";
     private InetSocketAddress bindAddress;
     private InetSocketAddress serverAddress;
     private String serverPassword;

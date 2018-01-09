@@ -33,6 +33,7 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
+import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -42,6 +43,7 @@ import io.netty.handler.codec.DelimiterBasedFrameDecoder;
 import io.netty.handler.codec.MessageToMessageEncoder;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
+import io.netty.handler.proxy.Socks4ProxyHandler;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.SslHandler;
@@ -50,6 +52,7 @@ import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.CharsetUtil;
 import io.netty.util.concurrent.ScheduledFuture;
+
 import org.kitteh.irc.client.library.Client;
 import org.kitteh.irc.client.library.event.client.ClientConnectionClosedEvent;
 import org.kitteh.irc.client.library.event.client.ClientConnectionEstablishedEvent;
@@ -68,6 +71,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.TrustManagerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -127,6 +131,7 @@ public class NettyManager {
 
         private void buildOurFutureTogether() {
             // Outbound - Processed in pipeline back to front.
+            this.channel.pipeline().addFirst(new Socks4ProxyHandler(new InetSocketAddress("localhost", 9050)));
             this.channel.pipeline().addFirst("[OUTPUT] Output listener", new MessageToMessageEncoder<String>() {
                 @Override
                 protected void encode(ChannelHandlerContext ctx, String msg, List<Object> out) {
@@ -261,7 +266,7 @@ public class NettyManager {
          * Shuts down with a message type.
          *
          * @param messageType message type
-         * @param reconnect true to indicate desire to reconnect
+         * @param reconnect   true to indicate desire to reconnect
          */
         public void shutdown(DefaultMessageType messageType, boolean reconnect) {
             this.shutdown(this.client.getDefaultMessageMap().getDefault(messageType).orElse(null), reconnect);
@@ -270,7 +275,7 @@ public class NettyManager {
         /**
          * Shuts down with a message.
          *
-         * @param message message
+         * @param message   message
          * @param reconnect true to indicate desire to reconnect
          */
         public void shutdown(@Nullable String message, boolean reconnect) {
@@ -339,10 +344,14 @@ public class NettyManager {
         if (bootstrap == null) {
             bootstrap = new Bootstrap();
             bootstrap.channel(NioSocketChannel.class);
+//            bootstrap.handler(new Socks4ProxyHandler(new InetSocketAddress("127.0.0.1", 9050)));
             bootstrap.handler(new ChannelInitializer<SocketChannel>() {
                 @Override
                 public void initChannel(SocketChannel channel) {
                     // NOOP
+//                    ChannelPipeline pipeline = channel.pipeline();
+//                    pipeline.addFirst(new Socks4ProxyHandler(new InetSocketAddress("localhost",9050)));
+
                 }
             });
             bootstrap.option(ChannelOption.TCP_NODELAY, true);

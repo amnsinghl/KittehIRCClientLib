@@ -4,7 +4,7 @@
 
     <groupId>org.kitteh.irc</groupId>
     <artifactId>client-lib</artifactId>
-    <version>4.0.1-SNAPSHOT</version>
+    <version>4.0.7-SNAPSHOT</version>
 
     <packaging>jar</packaging>
 
@@ -80,6 +80,13 @@
             <artifactId>netty-handler</artifactId>
             <version>${dependency.netty.version}</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-handler-proxy</artifactId>
+            <version>${dependency.netty.version}</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/jars/netty-handler-proxy-4.1.19.Final.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
